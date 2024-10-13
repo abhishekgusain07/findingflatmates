@@ -1,0 +1,4 @@
+1. revamp homepage.
+2. design schema.
+3. chat server
+
