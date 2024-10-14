@@ -17,6 +17,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createAd } from "./form.action"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react"
+import { toast } from "sonner"
 
 export const formSchema = z.object({
   title: z.string().min(2, {
@@ -31,9 +34,12 @@ export const formSchema = z.object({
   price: z.string().min(1, {
     message: "price must be at least 1.",
   }),
+  looking_for: z.union([z.literal("male"), z.literal("female"), z.literal("any")]),
+  occupancy_type: z.union([z.literal("shared"), z.literal("single"), z.literal("any")]),
 })
 
 export function ProfileForm() {
+    const [isLoading, setIsLoading] = useState<boolean>(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,11 +47,22 @@ export function ProfileForm() {
       description: "",
       location: "",
       price: "",
+      looking_for: "any",
+      occupancy_type: "any",
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await createAd(values)
+    setIsLoading(true)
+    try {
+      await createAd(values)
+      toast.success("Ad created successfully")
+    } catch (error) {
+        toast.error("Failed to create ad")
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -122,6 +139,54 @@ export function ProfileForm() {
                       placeholder='Enter price for ad...'
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="looking_for"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Looking For</FormLabel>
+                  <FormControl>
+                  <Select>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Male" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="any">Any</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="occupancy_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Occupancy Type</FormLabel>
+                  <FormControl>
+                    <Select>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="shared" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="shared">Shared</SelectItem>
+                                <SelectItem value="single">Single</SelectItem>
+                                <SelectItem value="any">Any</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
