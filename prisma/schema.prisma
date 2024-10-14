@@ -72,4 +72,43 @@ model invoices {
   user_id         String?
 }
 
+model ads {
+  id                Int        @id @default(autoincrement()) // Unique identifier for the ad
+  user_id           String     // Reference to the user who created the ad
+  title             String     // Title of the ad
+  description       String     // Description of the ad
+  location          String     // Location of the property
+  photos            String[]   // Array of photo URLs
+  price             Float      // Rent amount
+  looking_for       String     // Looking for (e.g., "male", "female", "any")
+  occupancy_type    String     // Type of occupancy (e.g., "shared", "single", etc.)
+  features          features[] // Link to features
+  amenities         amenities[] // Link to amenities
+  preferences       preferences[] // Link to preferences
+  created_at        DateTime   @default(now()) // Timestamp for when the ad was created
+  updated_at        DateTime   @updatedAt // Timestamp for when the ad was last updated
+}
+
+model features {
+  id      Int    @id @default(autoincrement()) // Unique identifier for the feature
+  name    String // Name of the feature
+  ad_id   Int    // Reference to the ad
+  ad      ads    @relation(fields: [ad_id], references: [id]) // Link to the ads model
+}
+
+model amenities {
+  id      Int    @id @default(autoincrement()) // Unique identifier for the amenity
+  name    String // Name of the amenity
+  ad_id   Int    // Reference to the ad
+  ad      ads    @relation(fields: [ad_id], references: [id]) // Link to the ads model
+}
+
+model preferences {
+  id      Int    @id @default(autoincrement()) // Unique identifier for the preference
+  name    String // Name of the preference
+  ad_id   Int    // Reference to the ad
+  ad      ads    @relation(fields: [ad_id], references: [id]) // Link to the ads model
+}
+
+
 

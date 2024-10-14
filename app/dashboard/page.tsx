@@ -12,18 +12,28 @@ import { redirect } from 'next/navigation'
 
 export default async function Dashboard() {
   const {userId} = auth()
-  console.log(userId)
-  const user = await prisma.user.findUnique({
-    where: {
-      user_id: userId || undefined,
-    }
-  })
-  console.log(user)
-  if(!user){
-    redirect('/sign-in')
+  if (!userId) {
+    redirect('/sign-in');
   }
-  if(user.subscription === null){
-    return <NotAuthorized />
+
+  let user;
+  try {
+    user = await prisma.user.findUnique({
+      where: {
+        user_id: userId,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    redirect('/error'); // Redirect to an error page or handle accordingly
+  }
+
+  console.log(user);
+  if (!user) {
+    redirect('/sign-in');
+  }
+  if (user.subscription === null) {
+    return <NotAuthorized />;
   }
   return (
     <div className='flex flex-col justify-center items-start flex-wrap px-4 pt-4 gap-4'>
