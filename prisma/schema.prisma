@@ -113,7 +113,7 @@ model preferences {
 }
 
 model conversations {
-  id          Int        @id @default(autoincrement()) // Unique identifier for the conversation
+  id          String        @id // Unique identifier for the conversation
   ad_id       Int        // Reference to the ad
   user1_id    String     // ID of the first user
   user2_id    String     // ID of the second user
@@ -123,10 +123,10 @@ model conversations {
 }
 
 model messages {
-  id              Int        @id @default(autoincrement()) // Unique identifier for the message
-  conversation_id Int        // Reference to the conversation
+  id              String        @id // Unique identifier for the message
+  conversation_id String        // Reference to the conversation
   sender_id       String     // ID of the user who sent the message
   content         String     // Content of the message
   created_at      DateTime   @default(now()) // Timestamp for when the message was sent
   conversation    conversations @relation(fields: [conversation_id], references: [id]) // Link to the conversations model
-}
+} 

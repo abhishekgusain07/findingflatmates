@@ -36,7 +36,7 @@ const ConversationsPage = () => {
             setIsFetchLoading(false);
         }
     }
-    const fetchConversationById = async (id: number) => {
+    const fetchConversationById = async (id: string) => {
         setIsFetchingConversation(true);
         try {
             const conversation = await getMessagesByConversationId(id);
