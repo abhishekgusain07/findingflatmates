@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { FileTextIcon, Loader2, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createConversation, getConversation } from "./conversations.action";
-import { conversations } from "@prisma/client";
+import { createConversation, getConversation, getConversationById, getMessagesByConversationId } from "./conversations.action";
+import { conversations, messages } from "@prisma/client";
 
 const ConversationsPage = () => {
     const [isSeedLoading, setIsSeedLoading] = useState<boolean>(false);
     const [isFetchLoading, setIsFetchLoading] = useState<boolean>(false);
+    const [isFetchingConversation, setIsFetchingConversation] = useState<boolean>(false);
     const [conversation, setConversation] = useState<conversations[] | null>(null);
+    const [conversationMessages , setConversationMessages] = useState<messages[] | null>(null);
     const seedConversation = async () => {
         setIsSeedLoading(true);
         try {
@@ -34,6 +36,18 @@ const ConversationsPage = () => {
             setIsFetchLoading(false);
         }
     }
+    const fetchConversationById = async (id: number) => {
+        setIsFetchingConversation(true);
+        try {
+            const conversation = await getMessagesByConversationId(id);
+            setConversationMessages(conversation);
+        } catch (error) {
+            console.error(error);
+            toast.error("Error fetching conversation");
+        } finally {
+            setIsFetchingConversation(false);
+        }
+    }
     return (
         <div className="flex flex-col h-screen justify-center items-center">
             <div className="flex flex-col justify-center items-center p-10 gap-4">
@@ -48,8 +62,17 @@ const ConversationsPage = () => {
             {
                 conversation && conversation.map((conversation) => {
                     return (
-                        <div key={conversation.id}>
-                            <p className="text-sm text-gray-500">{conversation.id}</p>
+                        <div key={conversation.id} className="flex flex-col justify-center items-center p-3 gap-4 hover:bg-gray-300 rounded-md" onClick={() => {
+                            fetchConversationById(conversation.id);
+                        }}>
+                            <p className="text-sm text-gray-500 hover:text-gray-700 hover: cursor-pointer">Conversation no: {conversation.id}</p>
+                            {
+                                conversationMessages && conversationMessages.map((message) => {
+                                    return (
+                                        <p className="text-sm text-gray-500 hover:text-gray-700 hover: cursor-pointer">{message.content}</p>
+                                    )
+                                })
+                            }
                         </div>
                     )
                 })

@@ -1,6 +1,6 @@
 'use server'
 import prisma from "@/lib/prisma";
-import { conversations } from "@prisma/client";
+import { conversations, messages } from "@prisma/client";
 
 export async function createConversation(): Promise<conversations | null> {
     try {
@@ -33,3 +33,30 @@ export async function getConversation(): Promise<conversations[] | null> {
         throw error;
     }
 }   
+
+export async function getConversationById(id: number): Promise<conversations | null> {
+    try {
+        const conversation = await prisma.conversations.findUnique({
+            where: {
+                id: id,
+            },
+        });
+        return conversation;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+export async function getMessagesByConversationId(id: number): Promise<messages[] | null> {
+    try {
+        const messages = await prisma.messages.findMany({
+            where: {
+                conversation_id: id,
+            },
+        });
+        return messages;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
