@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { getMessageofConversation } from "./conversation.action";
 import { toast } from "sonner";
+import MessageInput from "./messageInput";
 
 interface ChatComponentProps {
     conversationId: string;
@@ -55,6 +56,7 @@ const ChatComponent = ({conversationId}: ChatComponentProps) => {
                     </div>
                 ))}
             </div>
+            <MessageInput conversationId={conversationId} userId={userId}/>
         </div>
     )
 }
