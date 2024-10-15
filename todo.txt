@@ -3,6 +3,7 @@
 3. fix: prisma error
 4. seeding data
 5. uploadthing setup to upload photos of property
+6. sending message to websocket backend
 
 
 
