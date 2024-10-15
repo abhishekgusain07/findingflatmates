@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { Loader2 } from 'lucide-react'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -192,7 +193,11 @@ export function ProfileForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit">
+              {
+                isLoading ? <Loader2 className = "size-4 animate-spin" /> : "submit"
+              }
+            </Button>
           </form>
         </Form>
       </CardContent>
