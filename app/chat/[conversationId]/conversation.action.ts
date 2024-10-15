@@ -29,6 +29,20 @@ export async function sendMessage(conversationId: string, message: string, userI
                 sender_id: userId!,
             }
         })
+
+        //send notification to web socket 
+        const response: Response = await fetch(`http://127.0.0.1:8000/ws/notify/${conversationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content: newMessage.content,
+                sender_id: newMessage.sender_id,
+            }),
+        })
+        console.log(response.status);
+
         return newMessage;
     } catch (error) {
         console.error(error);

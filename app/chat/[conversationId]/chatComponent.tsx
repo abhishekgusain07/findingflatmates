@@ -12,12 +12,20 @@ interface ChatComponentProps {
     conversationId: string;
 }
 
+interface PartialMessage {
+    content: string;
+    sender_id: string;
+}
+
 const ChatComponent = ({conversationId}: ChatComponentProps) => {
-    const [messages, setMessages] = useState<messages[] | null>(null);
+    const [messages, setMessages] = useState<Partial<PartialMessage>[] | null>(null);
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const router = useRouter();
     const {user} = useUser();
     const userId = user?.id;
+    const generateRandomId = () => {
+        return Math.random().toString(36).substring(2, 15);
+    }
     useEffect(() => {
         const socket = new WebSocket(`ws://localhost:8000/ws/${conversationId}/${userId}`);
         setSocket(socket);
@@ -30,7 +38,14 @@ const ChatComponent = ({conversationId}: ChatComponentProps) => {
         const fetchPreviousMessages = async () => {
             try{
                 const messages = await getMessageofConversation(conversationId);
-                setMessages(messages);
+                if(messages){
+                    //format message so that it only contains content, sender_id
+                    const formattedMessages = messages?.map((message) => ({
+                        content: message.content,
+                        sender_id: message.sender_id,
+                    }));
+                    setMessages(formattedMessages);
+                }else setMessages(null);
                 toast.success("Messages fetched successfully");
             } catch (error) {
                 console.error(error);
@@ -39,8 +54,20 @@ const ChatComponent = ({conversationId}: ChatComponentProps) => {
         }
         fetchPreviousMessages();
         socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            setMessages((prevMessages) => prevMessages ? [...prevMessages, message] : [message]);
+            console.log("WebSocket message received");
+            console.log(event.data);
+            try {
+                const { message, sender_id } = JSON.parse(event.data);
+                // Create a new message object to match the expected structure
+                const newMessage = { content: message, sender_id: sender_id };
+                setMessages((prevMessages) => prevMessages ? [...prevMessages, newMessage] : [newMessage]);
+            } catch (error) {
+                console.error("Error parsing message:", error);
+                toast.error("Received invalid message format");
+            }
+        };
+        socket.onclose = () => {
+            console.log("WebSocket connection closed");
         };
     }, [conversationId, userId]);
     return (
@@ -51,7 +78,7 @@ const ChatComponent = ({conversationId}: ChatComponentProps) => {
             </div>
             <div className="flex flex-col items-center justify-center mt-5 gap-3">
                 {messages?.map((message) => (
-                    <div key={message.id} className="flex flex-col items-center justify-center">
+                    <div key={message.content+generateRandomId()} className="flex flex-col items-center justify-center">
                         <h1>{message.content}</h1>
                     </div>
                 ))}
