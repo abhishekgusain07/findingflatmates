@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Loader2 } from 'lucide-react'
+import { Loader2, XIcon } from 'lucide-react'
+import { useDropzone } from 'react-dropzone'
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,7 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createAd } from "./form.action"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
 export const formSchema = z.object({
@@ -37,10 +38,24 @@ export const formSchema = z.object({
   }),
   looking_for: z.union([z.literal("male"), z.literal("female"), z.literal("any")]),
   occupancy_type: z.union([z.literal("shared"), z.literal("single"), z.literal("any")]),
+  photos: z.array(z.string()).optional(),
 })
 
 export function ProfileForm() {
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [isLoadingFiles, setIsLoadingFiles] = useState<boolean>(false)
+  const [isUploadingFiles, setIsUploadingFiles] = useState<boolean>(false)
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    // Do something with the files
+    setIsLoadingFiles(true)
+    setSelectedFiles(acceptedFiles)
+    console.log(acceptedFiles)
+    setIsLoadingFiles(false)
+  }, [])
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,6 +65,7 @@ export function ProfileForm() {
       price: "",
       looking_for: "any",
       occupancy_type: "any",
+      photos: [],
     },
   })
 
@@ -193,6 +209,69 @@ export function ProfileForm() {
                 </FormItem>
               )}
             />
+            {/* <FormField
+              control={form.control}
+              name="photos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Photos</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-2" >
+                    <Input
+                      type='file'
+                      placeholder='Enter photos for ad...'
+                      {...field}
+                      multiple
+                      className="cursor-pointer"
+                    />
+                    <Button>Upload</Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+            <FormField
+              control={form.control}
+              name="photos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Photos</FormLabel>
+                  <FormControl>
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    {
+                      isDragActive ?
+                        <p>Drop the files here ...</p> :
+                        <p>Drag 'n' drop some files here, or click to select files</p>
+                    }
+                  </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {
+              isLoadingFiles ?  <Loader2 className = "size-4 animate-spin" /> :
+              <div className="mt-4 flex flex-wrap gap-2">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={URL.createObjectURL(file)} // Create a URL for the file
+                      alt={`Preview ${index}`}
+                      className="w-32 h-32 object-cover mr-2 rounded-md opacity-90 hover:opacity-100" // Adjust size as needed
+                    />
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== index))}
+                      className="absolute top-0 right-2 mt-1 ml-1 bg-red-500 text-white rounded-full  opacity-40 hover:opacity-100"
+                    >
+                      <XIcon className="size-2" />
+                    </Button>
+                  </div>
+                  ))}
+              </div>
+            }
             <Button type="submit">
               {
                 isLoading ? <Loader2 className = "size-4 animate-spin" /> : "submit"
