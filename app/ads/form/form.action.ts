@@ -60,3 +60,17 @@ export async function createAd(values: z.infer<typeof formSchema>) {
         console.log(error)
     }
 }
+
+
+export const fetchUserImage = async () => {
+    const { userId } = auth()
+    if (!userId) {
+        throw new Error("Unauthorized")
+    }
+    const user = await prisma.user.findUnique({
+        where: {
+            user_id: userId
+        }
+    })
+    return user?.profile_photo
+}

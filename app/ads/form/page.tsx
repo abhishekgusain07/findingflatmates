@@ -18,12 +18,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { createAd } from "./form.action"
+import { createAd, fetchUserImage } from "./form.action"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useEdgeStore } from "@/lib/edgestore"
 import Link from "next/link"
+import { useConfirm } from "@/hooks/use-confirm"
 
 export const formSchema = z.object({
   title: z.string().min(2, {
@@ -58,7 +59,20 @@ export function ProfileForm() {
   }, [])
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [userImage, setUserImage] = useState<string | null>(null)
 
+  useEffect(() => {
+    const fetchAndSetUserImage = async () => {
+      const image = await fetchUserImage()
+      setUserImage(image || null)
+    }
+    fetchAndSetUserImage()
+  }, [])
+
+  const [ConfirmDialog, confirm] = useConfirm(
+    "Are you sure",
+    "This will deactivate the current invite code and regenerate a new one"
+  )
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,7 +86,18 @@ export function ProfileForm() {
       photos: [],
     },
   })
-
+  const uploadProfilePhoto = async (file: File) => {
+    try {
+      const uploadedFiles = await edgestore.publicFiles.upload({
+        file,
+        onProgressChange: (progress) => {
+          setProgress((progress/100))
+        }
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  } 
   const uploadFiles = async (files: File[]) => {
     try {
       let len = files.length;
@@ -98,6 +123,10 @@ export function ProfileForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
+      if(!userImage) {
+        toast.error("Please upload a profile photo")
+        return
+      }
       values.photos = uploadedFilesUrls
       await createAd(values)
       toast.success("Ad created successfully")
@@ -121,6 +150,17 @@ export function ProfileForm() {
       <CardContent className='space-y-2'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {
+              !userImage ? (
+                <div>
+                  todo: profile image input components  
+                </div>
+              ) : (
+                <div>
+                  todo: show user profile image / do nothing removing this component.
+                </div>
+              )
+            }
             <FormField
               control={form.control}
               name="title"
