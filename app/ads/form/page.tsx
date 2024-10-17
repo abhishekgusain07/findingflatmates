@@ -22,6 +22,8 @@ import { createAd } from "./form.action"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCallback, useState } from "react"
 import { toast } from "sonner"
+import { useEdgeStore } from "@/lib/edgestore"
+import Link from "next/link"
 
 export const formSchema = z.object({
   title: z.string().min(2, {
@@ -45,11 +47,13 @@ export function ProfileForm() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [isLoadingFiles, setIsLoadingFiles] = useState<boolean>(false)
   const [isUploadingFiles, setIsUploadingFiles] = useState<boolean>(false)
+  const [uploadedFilesUrls, setUploadedFilesUrls] = useState<string[]>([])
+  const [progress, setProgress] = useState<number>(0)
+  const { edgestore } = useEdgeStore();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     // Do something with the files
     setIsLoadingFiles(true)
     setSelectedFiles(acceptedFiles)
-    console.log(acceptedFiles)
     setIsLoadingFiles(false)
   }, [])
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
@@ -69,11 +73,35 @@ export function ProfileForm() {
     },
   })
 
+  const uploadFiles = async (files: File[]) => {
+    try {
+      let len = files.length;
+      setIsUploadingFiles(true)
+      const uploadedFilesUrls = []
+      for (const file of files) {
+        const uploadedFiles = await edgestore.publicFiles.upload({
+          file,
+          onProgressChange: (progress) => {
+            setProgress((progress/len))
+          }
+        })
+        uploadedFilesUrls.push(uploadedFiles.url)
+      }
+      setUploadedFilesUrls(uploadedFilesUrls)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsUploadingFiles(false)
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
+      values.photos = uploadedFilesUrls
       await createAd(values)
       toast.success("Ad created successfully")
+      form.reset()
     } catch (error) {
         toast.error("Failed to create ad")
       console.log(error)
@@ -253,24 +281,46 @@ export function ProfileForm() {
             />
             {
               isLoadingFiles ?  <Loader2 className = "size-4 animate-spin" /> :
-              <div className="mt-4 flex flex-wrap gap-2">
-                {selectedFiles.map((file, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={URL.createObjectURL(file)} // Create a URL for the file
-                      alt={`Preview ${index}`}
-                      className="w-32 h-32 object-cover mr-2 rounded-md opacity-90 hover:opacity-100" // Adjust size as needed
-                    />
-                    <Button
-                      variant="ghost"
-                      onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== index))}
-                      className="absolute top-0 right-2 mt-1 ml-1 bg-red-500 text-white rounded-full  opacity-40 hover:opacity-100"
-                    >
-                      <XIcon className="size-2" />
-                    </Button>
-                  </div>
-                  ))}
-              </div>
+              <>
+                <div className="h-[6px] w-44 border rounded overflow-hidden">
+                  <div className="h-full bg-blue-500" style={{width: `${progress * 100}%`}} />
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)} // Create a URL for the file
+                        alt={`Preview ${index}`}
+                        className="w-32 h-32 object-cover mr-2 rounded-md opacity-90 hover:opacity-100" // Adjust size as needed
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== index))}
+                        className="absolute top-0 right-2 mt-1 ml-1 bg-red-500 text-white rounded-full  opacity-40 hover:opacity-100"
+                      >
+                        <XIcon className="size-2" />
+                      </Button>
+                    </div>
+                    ))}
+                    <Button type="button" onClick={() => setSelectedFiles([])}>Clear</Button>
+                    <Button type="button" 
+                      disabled={isUploadingFiles}
+                      onClick={() => {
+                      uploadFiles(selectedFiles)
+                    }}>upload {
+                      isUploadingFiles && <Loader2 className = "size-4 animate-spin ml-2" />
+                    }</Button>
+                    {
+                      uploadedFilesUrls.map((url, index) => (
+                        <div key={index}>
+                          <Link href={url} target="_blank">{url}</Link>
+                        </div>
+                      ))
+                    }
+                </div>
+              </>
             }
             <Button type="submit">
               {

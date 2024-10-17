@@ -57,11 +57,17 @@ const ViewAdPage = () => {
                     <div key={ad.id} >
                         <h1>{ad.title}</h1>
                         <p className="text-muted-foreground">{ad.description}</p>
+                        {
+                            ad.photos.map((photo) => (
+                                <img src={photo} alt="ad" />
+                            ))
+                        }
                         <Button variant="ghost" onClick={() => {
                             createConversation(ad.id, ad.user_id);
                         }}>
                             Chat with Owner
                         </Button>
+
                     </div>
                 ))
             }

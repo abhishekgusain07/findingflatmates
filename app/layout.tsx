@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { GeistSans } from 'geist/font/sans'
 import type { Metadata } from 'next'
 import './globals.css'
+import { EdgeStoreProvider } from '@/lib/edgestore'
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://starter.rasmic.xyz"),
@@ -51,8 +52,9 @@ export default function RootLayout({
           />
         </head>
         <body className={GeistSans.className}>
-          <Provider>
-            <ThemeProvider
+          <EdgeStoreProvider>
+            <Provider>
+              <ThemeProvider
               attribute="class"
               defaultTheme="system"
               enableSystem
@@ -62,6 +64,7 @@ export default function RootLayout({
               <Toaster />
             </ThemeProvider>
           </Provider>
+          </EdgeStoreProvider>
           <Analytics />
         </body>
       </html>

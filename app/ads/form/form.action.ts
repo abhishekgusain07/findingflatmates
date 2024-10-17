@@ -31,6 +31,7 @@ export async function createAd(values: z.infer<typeof formSchema>) {
                 price: Number(values.price),
                 looking_for: values.looking_for,
                 occupancy_type: values.occupancy_type,
+                photos: values.photos,
                 features: {
                     create: {
                         name: 'Parking'
