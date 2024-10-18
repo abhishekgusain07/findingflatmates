@@ -18,13 +18,15 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { createAd, fetchUserImage } from "./form.action"
+import { changeProfilePhoto, createAd, fetchUserImage } from "./form.action"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useEdgeStore } from "@/lib/edgestore"
 import Link from "next/link"
 import { useConfirm } from "@/hooks/use-confirm"
+import ProfilePhotoUpload from "./profile_photo_upload"
+import { StdioNull } from "child_process"
 
 export const formSchema = z.object({
   title: z.string().min(2, {
@@ -59,12 +61,13 @@ export function ProfileForm() {
   }, [])
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [userImage, setUserImage] = useState<string | null>(null)
+  const [userImage, setUserImage] = useState<string | null | undefined>(null)
 
   useEffect(() => {
     const fetchAndSetUserImage = async () => {
-      const image = await fetchUserImage()
-      setUserImage(image || null)
+      const imageUser = await fetchUserImage()
+      console.log(imageUser)
+      setUserImage(imageUser)
     }
     fetchAndSetUserImage()
   }, [])
@@ -86,18 +89,23 @@ export function ProfileForm() {
       photos: [],
     },
   })
+
+
+  //upload profile photo to edgestore
   const uploadProfilePhoto = async (file: File) => {
     try {
       const uploadedFiles = await edgestore.publicFiles.upload({
-        file,
-        onProgressChange: (progress) => {
-          setProgress((progress/100))
-        }
+        file
       })
+      const profilePhotoUrl = uploadedFiles.url
+      const res = await changeProfilePhoto(profilePhotoUrl)
+      toast.success("Profile photo uploaded successfully")
+      setUserImage(profilePhotoUrl)
     } catch (error) {
-      console.log(error)
+      toast.error("Failed to upload profile photo")
     }
   } 
+
   const uploadFiles = async (files: File[]) => {
     try {
       let len = files.length;
@@ -150,17 +158,7 @@ export function ProfileForm() {
       <CardContent className='space-y-2'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {
-              !userImage ? (
-                <div>
-                  todo: profile image input components  
-                </div>
-              ) : (
-                <div>
-                  todo: show user profile image / do nothing removing this component.
-                </div>
-              )
-            }
+            <ProfilePhotoUpload currentPhotoUrl={userImage} onPhotoSelect={uploadProfilePhoto} />
             <FormField
               control={form.control}
               name="title"

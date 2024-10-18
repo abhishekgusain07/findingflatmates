@@ -74,3 +74,31 @@ export const fetchUserImage = async () => {
     })
     return user?.profile_photo
 }
+
+export const changeProfilePhoto = async (photoUrl: string) => {
+    try {
+        const { userId } = auth()
+        if (!userId) {
+            throw new Error("Unauthorized")
+        }
+        const user = await prisma.user.findUnique({
+            where: {
+            user_id: userId
+            }
+        })
+        if (!user) {
+            throw new Error("User not found")
+        }
+        const updatedUser = await prisma.user.update({
+            where: {
+                user_id: userId
+            },
+            data: {
+                profile_photo: photoUrl
+            }
+        })
+        return updatedUser
+    } catch (error) {
+        throw new Error("Failed to upload profile photo")
+    }
+}
