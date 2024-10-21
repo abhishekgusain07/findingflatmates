@@ -1,3 +1,4 @@
 1. Revamp homepage.
-2. edgestore setup to upload photo of properties
-3. revamp chat, conversation page.
+2. revamp chat, conversation page.
+3. ui revamp
+

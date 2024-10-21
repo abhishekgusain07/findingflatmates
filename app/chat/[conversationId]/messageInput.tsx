@@ -17,6 +17,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { sendMessage } from "./conversation.action";
+import { PartialMessage } from "./chatComponent";
 
 interface MessageInputProps {
     conversationId: string;

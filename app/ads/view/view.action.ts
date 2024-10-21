@@ -14,7 +14,7 @@ export async function getAd(): Promise<ads[]> {
     }
 }
 
-export async function checkExistingConversationWithAdId(adId: number): Promise<conversations | null> {
+export async function checkExistingConversationWithAdId(adId: string): Promise<conversations | null> {
     try {
         const conversation = await prisma.conversations.findFirst({
             where: {
@@ -28,7 +28,7 @@ export async function checkExistingConversationWithAdId(adId: number): Promise<c
     }
 }
 
-export async function createConversationWithOwner(adId: number, ownerId: string): Promise<conversations> {
+export async function createConversationWithOwner(adId: string, ownerId: string): Promise<conversations> {
     try {
         const {userId} = await auth()
         const conversationId = uid(32)
@@ -54,3 +54,17 @@ export async function createConversationWithOwner(adId: number, ownerId: string)
         throw new Error("Failed to create conversation")
     }
 }   
+
+export const fetchAdPosterImage = async (adId : string) => {
+    try {
+        const ad = await prisma.ads.findUnique({
+            where: {
+                id: adId
+            }
+        })
+        return ad?.user_id
+    }catch(error){
+        console.log(error)
+        throw new Error("Failed to fetch ad poster image")
+    }
+}  

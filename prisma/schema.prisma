@@ -74,7 +74,7 @@ model invoices {
 }
 
 model ads {
-  id                Int        @id @default(autoincrement()) // Unique identifier for the ad
+  id                String        @id  // Unique identifier for the ad
   user_id           String     // Reference to the user who created the ad
   title             String     // Title of the ad
   description       String     // Description of the ad
@@ -93,29 +93,29 @@ model ads {
 }
 
 model features {
-  id      Int    @id @default(autoincrement()) // Unique identifier for the feature
+  id      String    @id  // Unique identifier for the feature
   name    String // Name of the feature
-  ad_id   Int    // Reference to the ad
+  ad_id   String // Reference to the ad
   ad      ads    @relation(fields: [ad_id], references: [id]) // Link to the ads model
 }
 
 model amenities {
-  id      Int    @id @default(autoincrement()) // Unique identifier for the amenity
+  id      String    @id  // Unique identifier for the amenity
   name    String // Name of the amenity
-  ad_id   Int    // Reference to the ad
+  ad_id   String    // Reference to the ad
   ad      ads    @relation(fields: [ad_id], references: [id]) // Link to the ads model
 }
 
 model preferences {
-  id      Int    @id @default(autoincrement()) // Unique identifier for the preference
+  id      String    @id  // Unique identifier for the preference
   name    String // Name of the preference
-  ad_id   Int    // Reference to the ad
+  ad_id   String    // Reference to the ad
   ad      ads    @relation(fields: [ad_id], references: [id]) // Link to the ads model
 }
 
 model conversations {
   id          String        @id // Unique identifier for the conversation
-  ad_id       Int        // Reference to the ad
+  ad_id       String        // Reference to the ad
   user1_id    String     // ID of the first user
   user2_id    String     // ID of the second user
   created_at  DateTime   @default(now()) // Timestamp for when the conversation was created

@@ -3,9 +3,14 @@ import { auth } from "@clerk/nextjs/server"
 import { formSchema } from "./page"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
+import { uid } from "uid"
 
 
 export async function createAd(values: z.infer<typeof formSchema>) {
+    const featureId = uid()
+    const amenityId = uid()
+    const preferenceId = uid()
+    const adId = uid()
     try {
         const { userId } = auth()
         if (!userId) {
@@ -24,6 +29,7 @@ export async function createAd(values: z.infer<typeof formSchema>) {
 
         const ad = await prisma.ads.create({
             data: {
+                id: adId,
                 user_id: userId,
                 title: values.title,
                 description: values.description,
@@ -34,16 +40,19 @@ export async function createAd(values: z.infer<typeof formSchema>) {
                 photos: values.photos,
                 features: {
                     create: {
+                        id: featureId,
                         name: 'Parking'
                     }
                 },
                 amenities: {
                     create: {
+                        id: amenityId,
                         name: 'Wifi'
                     }
                 },
                 preferences: {
                     create: {
+                        id: preferenceId,
                         name: 'Smoking'
                     }
                 },

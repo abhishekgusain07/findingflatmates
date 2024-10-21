@@ -66,7 +66,6 @@ export function ProfileForm() {
   useEffect(() => {
     const fetchAndSetUserImage = async () => {
       const imageUser = await fetchUserImage()
-      console.log(imageUser)
       setUserImage(imageUser)
     }
     fetchAndSetUserImage()

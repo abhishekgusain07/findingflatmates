@@ -7,12 +7,13 @@ import { useUser } from "@clerk/nextjs";
 import { getMessageofConversation } from "./conversation.action";
 import { toast } from "sonner";
 import MessageInput from "./messageInput";
+import ChatScreen from "./Chatscreen";
 
 interface ChatComponentProps {
     conversationId: string;
 }
 
-interface PartialMessage {
+export interface PartialMessage {
     content: string;
     sender_id: string;
 }
@@ -77,13 +78,8 @@ const ChatComponent = ({conversationId}: ChatComponentProps) => {
                 <h1 className="text-muted-foreground">user: {userId}</h1>
             </div>
             <div className="flex flex-col items-center justify-center mt-5 gap-3">
-                {messages?.map((message) => (
-                    <div key={message.content+generateRandomId()} className="flex flex-col items-center justify-center">
-                        <h1>{message.content}</h1>
-                    </div>
-                ))}
+                <ChatScreen messages={messages} conversationId={conversationId} userId={userId} />
             </div>
-            <MessageInput conversationId={conversationId} userId={userId}/>
         </div>
     )
 }
