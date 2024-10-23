@@ -1,4 +1,5 @@
 1. Revamp homepage.
 2. revamp chat, conversation page.
 3. ui revamp
-
+4. suscriptions on chatting with owner
+5. freemium model
