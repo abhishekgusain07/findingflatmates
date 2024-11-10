@@ -43,6 +43,8 @@ export const userCreate = async ({
     console.log("error", error);
 
     if (error?.code) return error;
+    //TODO: remove console logs
+    console.log("user create succesfully in database ... ");
     return data;
   } catch (error: any) {
     throw new Error(error.message);

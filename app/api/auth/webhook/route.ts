@@ -6,6 +6,8 @@ import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 
 export async function POST(req: Request) {
+  //TODO: remove console logs
+  console.log("Reached here .. starting");
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
@@ -66,7 +68,8 @@ export async function POST(req: Request) {
           profile_image_url: payload?.data?.profile_image_url,
           user_id: payload?.data?.id,
         });
-
+        //TODO: remove console logs
+        console.log("user created in db");
         return NextResponse.json({
           status: 200,
           message: "User info inserted",

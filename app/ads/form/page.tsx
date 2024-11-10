@@ -130,17 +130,17 @@ export function ProfileForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
-      if(!userImage) {
-        toast.error("Please upload a profile photo")
-        return
-      }
+      // if(!userImage) {
+      //   toast.error("Please upload a profile photo")
+      //   return
+      // }
       values.photos = uploadedFilesUrls
       await createAd(values)
       toast.success("Ad created successfully")
       form.reset()
     } catch (error) {
-        toast.error("Failed to create ad")
-      console.log(error)
+        toast.error("Failed to create ad ")
+        console.log(error)  
     } finally {
       setIsLoading(false)
     }

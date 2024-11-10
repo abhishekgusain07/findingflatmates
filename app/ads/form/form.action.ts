@@ -65,8 +65,9 @@ export async function createAd(values: z.infer<typeof formSchema>) {
             ad: ad
         }
     } catch (error) {
-        throw new Error("Failed to create ad")
+        //TODO: remove console logs
         console.log(error)
+        throw new Error("Failed to create ad ")
     }
 }
 
